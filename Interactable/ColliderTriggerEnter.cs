@@ -10,6 +10,7 @@ public class ColliderTriggerEnter : MonoBehaviour
 
     public UnityEvent TriggerEnter;
 
+    //o outro objeto necessariamente tem que ter um rigigbody para dar certo
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag(CompareTag))

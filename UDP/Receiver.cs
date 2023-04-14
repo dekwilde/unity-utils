@@ -7,39 +7,31 @@ using System.Net.Sockets;
 using System.Text;
 using UnityEngine.UI;
 
+public static class ReceiverActions
+{
+    public static Action<string> OnReceivedText;
+}
+
 public class Receiver : MonoBehaviour
 {
-    // Start is called before the first frame update
-
-    public const int listenPort = 2022;
-    //Socket udp;
-    IPEndPoint  ep;
-    IPEndPoint  serverEP;
+    public int listenPort = 2000;
+    IPEndPoint ep;
     UdpClient udp;
-
-    public Text Status;
 
     void Start()
     {
-        //ep = new IPEndPoint(IPAddress.Parse(serverIP), port);
         ep = new IPEndPoint(IPAddress.Any, listenPort);
-        //udp = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         udp = new UdpClient(listenPort);
-        udp.EnableBroadcast = true;
-
         Debug.Log("receiver start");
-        Status.text = "receiver start";
-
     }
 
     void Update()
     {
-        if(udp.Available != 0)
+        if (udp.Available != 0)
         {
             Byte[] receivedBytes = udp.Receive(ref ep);
             string returnData = Encoding.ASCII.GetString(receivedBytes);
-            Debug.Log("Received: " + returnData);
-            Status.text = "Received: " + returnData;
+            ReceiverActions.OnReceivedText?.Invoke(returnData);
         }
     }
 
@@ -47,5 +39,4 @@ public class Receiver : MonoBehaviour
     {
         udp.Close();
     }
-    
 }
