@@ -20,7 +20,4 @@ public class SceneLoader {
           SceneManager.LoadScene(sceneName);
      }
 
-     public void LoadScene(int buildIndex) {
-          SceneManager.LoadScene(buildIndex);
-     }
 }
