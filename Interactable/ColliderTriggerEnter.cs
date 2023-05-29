@@ -5,17 +5,25 @@ using UnityEngine.Events;
 
 public class ColliderTriggerEnter : MonoBehaviour
 {
-    
     public string CompareTag;
 
     public UnityEvent TriggerEnter;
 
-    //o outro objeto necessariamente tem que ter um rigigbody para dar certo
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag(CompareTag))
         {
             TriggerEnter.Invoke();
+        }
+    }
+
+    public UnityEvent CollisionEnter;
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.CompareTag(CompareTag))
+        {
+            CollisionEnter.Invoke();
         }
     }
 }

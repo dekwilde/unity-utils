@@ -12,22 +12,23 @@ public class CountDownController : MonoBehaviour
     public UnityEvent onStart;
     public UnityEvent onProgress;
     public UnityEvent onFinish;
-    Text CountDownText;
+
     bool isCount;
 
     int count;
     
     void Start()
     {
-        CountDownText = countDown.GetComponent<Text>();
         ResetCount();  
-        
     }
 
     void ResetCount() {
         isCount = false;
         count = countTotal;
-        CountDownText.text = "";
+        if(countDown) {
+            countDown.GetComponent<Text>().text = "";
+        }
+        
 
     }
 
@@ -48,7 +49,9 @@ public class CountDownController : MonoBehaviour
         isCount = true;
         while(isCount) {
             if(count>0) {
-                CountDownText.text = count.ToString();
+                if(countDown) {
+                    countDown.GetComponent<Text>().text = count.ToString();
+                }
                 onProgress.Invoke();
                 count--;
                 yield return new WaitForSeconds(1f);
