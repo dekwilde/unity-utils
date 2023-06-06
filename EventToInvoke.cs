@@ -6,8 +6,13 @@ using UnityEngine.Events;
 public class EventToInvoke : MonoBehaviour
 {
     public UnityEvent ToEvent;
+    public UnityEvent onEnable;
     public UnityEvent onStart;
+    
 
+    void OnEnable() {
+        onEnable.Invoke();
+    }
     void Start() 
     {
         onStart.Invoke();
