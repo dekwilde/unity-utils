@@ -10,75 +10,66 @@ using UnityEngine.Video;
 [RequireComponent(typeof(AudioSource))]
 public class CanvasVideoPlayer : MonoBehaviour
 {
-    public RawImage rawImage;
-    public VideoPlayer videoPlayer;
-    public AudioSource audioSource;
+     public RawImage rawImage;
+     public VideoPlayer videoPlayer;
+     public AudioSource audioSource;
+     public Slider slider;
 
-    [Header("Options")]
-    public float fadeInDuration = 0.4f;
-    public bool playOnEnable = true;
+     [Header("Options")]
+     public float fadeInDuration = 0.4f;
+     public bool playOnEnable = true;
 
-    private bool videoEnd = false;
+     public UnityEvent onStart;
 
-    public UnityEvent onStart;
+     public UnityEvent onComplete;
 
-    public UnityEvent onComplete;
 
-    private void OnEnable()
-    {
+     private void OnEnable()
+     {
+         	
+	     if (playOnEnable) PlayVideo();
+     }
 
-        if (playOnEnable) PlayVideo();
-    }
+     public void PlayVideo()
+     {
+          StartCoroutine(StartVideo());
+     }
 
-    public void PlayVideo()
-    {
-        StartCoroutine(StartVideo());
-    }
+     IEnumerator StartVideo()
+     {
+          rawImage.color = new Color(rawImage.color.r, rawImage.color.g, rawImage.color.b, 0);
+          videoPlayer.Prepare();
 
-    IEnumerator StartVideo()
-    {
-        videoEnd = false;
-        rawImage.color = new Color(rawImage.color.r, rawImage.color.g, rawImage.color.b, 0);
-        videoPlayer.Prepare();
+          yield return new WaitUntil(() => videoPlayer.isPrepared);
 
-        yield return new WaitUntil(() => videoPlayer.isPrepared);
+          rawImage.texture = videoPlayer.texture;
+          Application.targetFrameRate = (int)videoPlayer.frameRate;
+          videoPlayer.Play();
+          audioSource.Play();
 
-        videoPlayer.loopPointReached += OnMovieFinished;
+          yield return new WaitUntil(() => videoPlayer.time > 0.05f);
 
-        rawImage.texture = videoPlayer.texture;
-        Application.targetFrameRate = (int)videoPlayer.frameRate;
-        //videoPlayer.Play();
-        //audioSource.Play();
+		
+          PotaTween tween = PotaTween.Create(gameObject, 0);
+          tween.SetFloat(0, 1);
+          tween.SetDuration(fadeInDuration);
+          tween.UpdateCallback(() =>
+          {
+               //rawImage.color = Color.Lerp(Color.black, Color.white, tween.Duration);
+               rawImage.color = new Color(rawImage.color.r, rawImage.color.g, rawImage.color.b, tween.Float.Value);
 
-        yield return new WaitUntil(() => videoPlayer.time > 0.05f);
+          });
+          tween.Play(() =>
+          {
+               if (onStart != null)
+                    onStart.Invoke();
+          });
 
-        PotaTween tween = PotaTween.Create(gameObject, 0);
-        tween.SetFloat(0, 1);
-        tween.SetDuration(fadeInDuration);
-        tween.UpdateCallback(() =>
-        {
-            //rawImage.color = Color.Lerp(Color.black, Color.white, tween.Duration);
-            rawImage.color = new Color(rawImage.color.r, rawImage.color.g, rawImage.color.b, tween.Float.Value);
+          yield return new WaitUntil(() => videoPlayer.time >= videoPlayer.clip.length - .2f);
+          yield return new WaitForSeconds(fadeInDuration);
 
-        });
-        tween.Play(() =>
-        {
-            if (onStart != null)
-                onStart.Invoke();
-        });
-
-    }
-
-    void OnMovieFinished(VideoPlayer player)
-    {
-        if(!videoEnd) {
-          videoEnd = true;
-          Debug.Log("Event for movie end called");
-          player.Stop();
-          if (onComplete != null) {
+          if (onComplete != null)
                onComplete.Invoke();
-          } 
-        }
-    }
+     }
 
 }
