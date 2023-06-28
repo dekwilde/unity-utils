@@ -5,6 +5,9 @@ using UnityEngine.Events;
 
 public class ObjectClickEvent : MonoBehaviour
 {
+    // Prefab do objeto a ser instanciado
+    public GameObject objectPrefab;
+
     // Cria um UnityEvent para disparar quando o objeto for clicado
     [SerializeField]
     private UnityEvent onClick;
@@ -21,6 +24,14 @@ public class ObjectClickEvent : MonoBehaviour
             // Verifica se o raio atinge algum objeto com um Collider e se é o objeto que possui este script
             if (Physics.Raycast(ray, out hit) && hit.transform == this.transform)
             {
+                // Obtém as coordenadas do ponto de impacto
+                if (objectPrefab)
+                {
+                    Vector3 clickPoint = hit.point;
+                    // Instancia o objeto no ponto de impacto
+                    Instantiate(objectPrefab, clickPoint, Quaternion.identity);
+                }
+
                 // Dispara o evento OnClick
                 onClick.Invoke();
             }

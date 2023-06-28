@@ -24,7 +24,7 @@ public class GyroController : MonoBehaviour
 	private Quaternion baseOrientationRotationFix =  Quaternion.identity;
 
 	private Quaternion referanceRotation = Quaternion.identity;
-	private bool debug = false;
+	public bool debug = false;
 
 	#endregion
 
@@ -60,12 +60,15 @@ public class GyroController : MonoBehaviour
 		GUILayout.Label("input.gyro.attitude: " + Input.gyro.attitude);
 		GUILayout.Label("transform.rotation: " + transform.rotation);
 
-		if (GUILayout.Button("On/off gyro: " + Input.gyro.enabled, GUILayout.Height(30)))
+		/*
+		if (GUILayout.Button("On/off gyro: " + Input.gyro.enabled, GUILayout.Height(100)))
 		{
 			Input.gyro.enabled = !Input.gyro.enabled;
 		}
+		*/
 
-		if (GUILayout.Button("On/off gyro controller: " + gyroEnabled, GUILayout.Height(30)))
+		/*
+		if (GUILayout.Button("On/off gyro controller: " + gyroEnabled, GUILayout.Height(100)))
 		{
 			if (gyroEnabled)
 			{
@@ -76,23 +79,25 @@ public class GyroController : MonoBehaviour
 				AttachGyro();
 			}
 		}
+		
 
-		if (GUILayout.Button("Update gyro calibration (Horizontal only)", GUILayout.Height(30)))
+		if (GUILayout.Button("Update gyro calibration (Horizontal only)", GUILayout.Height(100)))
 		{
 			UpdateCalibration(true);
 		}
+		*/
 
-		if (GUILayout.Button("Update camera base rotation (Horizontal only)", GUILayout.Height(30)))
+		if (GUILayout.Button("Update camera base rotation (Horizontal only)", GUILayout.Height(100)))
 		{
 			UpdateCameraBaseRotation(true);
 		}
 
-		if (GUILayout.Button("Reset base orientation", GUILayout.Height(30)))
+		if (GUILayout.Button("Reset base orientation", GUILayout.Height(100)))
 		{
 			ResetBaseOrientation();
 		}
 
-		if (GUILayout.Button("Reset camera rotation", GUILayout.Height(30)))
+		if (GUILayout.Button("Reset camera rotation", GUILayout.Height(100)))
 		{
 			transform.rotation = Quaternion.identity;
 		}
