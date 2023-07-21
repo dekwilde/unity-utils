@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class CountDownController : MonoBehaviour
+public class CountDownManager : MonoBehaviour
 {
 
     public int countTotal;
