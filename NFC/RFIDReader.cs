@@ -9,7 +9,8 @@ using UnityEngine.Events;
 public class RFIDReader : MonoBehaviour
 {
     private Cardreader cardreader = new Cardreader();
-    public CardIdEvent OnReceived; // Crie um novo tipo de evento que aceite argumentos.
+    public CardIdEvent OnReceived;
+    public UnityEvent OnDisconnected;
 
     private void Start()
     {
@@ -33,6 +34,7 @@ public class RFIDReader : MonoBehaviour
     private void CardreaderOnCardDisconnectedHandler(object sender, CardreaderEventArgs e)
     {
         Debug.Log($"card: disconnected");
+        OnDisconnected.Invoke();
     }
 
     private void CardreaderOnCardConnectedHandler(object sender, CardreaderEventArgs e)
