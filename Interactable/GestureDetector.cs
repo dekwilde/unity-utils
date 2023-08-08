@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class SwipeDetector : MonoBehaviour
+public class GestureDetector : MonoBehaviour
 {
     private Vector2 fingerDown;
     private Vector2 fingerUp;
@@ -15,6 +15,8 @@ public class SwipeDetector : MonoBehaviour
     public UnityEvent InvokeDown;
     public UnityEvent InvokeLeft;
     public UnityEvent InvokeRight;
+    public UnityEvent InvokeClickDown;
+    public UnityEvent InvokeClickUp;
 
     // Update is called once per frame
     void Update()
@@ -28,6 +30,7 @@ public class SwipeDetector : MonoBehaviour
                 {
                     fingerUp = touch.position;
                     fingerDown = touch.position;
+                    InvokeClickDown.Invoke();
                 }
 
                 // Detecta o swipe enquanto o dedo ainda está se movendo
@@ -45,6 +48,7 @@ public class SwipeDetector : MonoBehaviour
                 {
                     fingerDown = touch.position;
                     checkSwipe();
+                    InvokeClickUp.Invoke();
                 }
             }
         }
@@ -55,6 +59,7 @@ public class SwipeDetector : MonoBehaviour
             {
                 fingerUp = Input.mousePosition;
                 fingerDown = Input.mousePosition;
+                InvokeClickDown.Invoke();
             }
 
             if (Input.GetMouseButton(0))
@@ -70,6 +75,7 @@ public class SwipeDetector : MonoBehaviour
             {
                 fingerDown = Input.mousePosition;
                 checkSwipe();
+                InvokeClickUp.Invoke();
             }
         }
     }
