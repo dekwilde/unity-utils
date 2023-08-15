@@ -26,7 +26,7 @@ public class ArduinoSerial : MonoBehaviour
         if (File.Exists(filePath))
         {
             var dataAsJson = File.ReadAllText(filePath);
-            var loadedData = JsonUtility.FromJson<JsonData>(dataAsJson);
+            var loadedData = JsonUtility.FromJson<DataJson>(dataAsJson);
             comPort = loadedData.COM;
             StartStream();
         }
@@ -36,22 +36,52 @@ public class ArduinoSerial : MonoBehaviour
     {
         stream = new SerialPort(comPort, 9600);
         stream.Open(); //Open the Serial Stream.
+        stream.ReadTimeout = 1;
         InvokeRepeating("ReadData", .5f, .1f);
+    }
+
+    void Update()
+    {
+        if (stream.IsOpen)
+        {
+            try
+            {
+                ReadDataInt(stream.ReadByte());
+            }
+            catch (System.Exception) { }
+        }
+    }
+
+    public void ReadDataInt(int code)
+    {
+        OnReceived.Invoke(code.ToString());
+        print("byte" + code.ToString());
     }
 
     public void ReadData()
     {
         stream.DiscardInBuffer();
         string strReceived = stream.ReadLine();
-        Debug.Log($"{strReceived}");
         OnReceived.Invoke(strReceived);
+        Debug.Log("string" + strReceived);
     }
 
     public void SendData(string data)
     {
         if (stream.IsOpen)
         {
-            stream.Write(data);
+            //stream.Write(data);
+            byte value;
+            if (Byte.TryParse("byte"+data, out value))
+            {
+                byte[] buffer = new byte[] { value };
+                stream.Write(buffer, 0, 1);
+            }
+            else
+            {
+                Debug.LogWarning("Failed to convert data to byte: " + data);
+            }
+            stream.WriteLine("string" + data);
         }
     }
 }
