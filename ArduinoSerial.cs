@@ -37,7 +37,7 @@ public class ArduinoSerial : MonoBehaviour
         stream = new SerialPort(comPort, 9600);
         stream.Open(); //Open the Serial Stream.
         stream.ReadTimeout = 1;
-        InvokeRepeating("ReadData", .5f, .1f);
+        //InvokeRepeating("ReadData", .5f, .1f);
     }
 
     void Update()
@@ -54,8 +54,10 @@ public class ArduinoSerial : MonoBehaviour
 
     public void ReadDataInt(int code)
     {
-        OnReceived.Invoke(code.ToString());
-        print("byte" + code.ToString());
+        char receivedChar = (char)code;
+        string receivedString = receivedChar.ToString();
+        OnReceived.Invoke(receivedString);
+        Debug.Log("received: " + receivedString);
     }
 
     public void ReadData()
@@ -71,8 +73,9 @@ public class ArduinoSerial : MonoBehaviour
         if (stream.IsOpen)
         {
             //stream.Write(data);
+            /*
             byte value;
-            if (Byte.TryParse("byte"+data, out value))
+            if (Byte.TryParse(data, out value))
             {
                 byte[] buffer = new byte[] { value };
                 stream.Write(buffer, 0, 1);
@@ -81,7 +84,8 @@ public class ArduinoSerial : MonoBehaviour
             {
                 Debug.LogWarning("Failed to convert data to byte: " + data);
             }
-            stream.WriteLine("string" + data);
+            */
+            stream.WriteLine(data);
         }
     }
 }
