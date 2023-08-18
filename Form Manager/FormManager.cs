@@ -74,63 +74,26 @@ public class FormManager : MonoBehaviour
             csvContent += $"{dado1},{dado2},{dado3}\n";
         }
 
-        // Criar o arquivo CSV na pasta StreamingAssets do Unity
-        string streamingPath = Path.Combine(Application.streamingAssetsPath, "registros.csv");
-        File.WriteAllText(streamingPath, csvContent);
+        // Altere o caminho para escrever o arquivo CSV diretamente no persistentDataPath
+        string filePath = Path.Combine(Application.temporaryCachePath, "registros.csv");
+        File.WriteAllText(filePath, csvContent);
 
 #if UNITY_ANDROID
-        // Compartilhar o arquivo CSV usando o compartilhamento nativo do Android
-        if (!Permission.HasUserAuthorizedPermission(Permission.ExternalStorageWrite))
-        {
-            Permission.RequestUserPermission(Permission.ExternalStorageWrite);
-            return;
-        }
+		// Export the file
+		NativeFilePicker.Permission permission = NativeFilePicker.ExportFile( filePath, ( success ) => Debug.Log( "File exported: " + success ) );
 
-        AndroidJavaClass intentClass = new AndroidJavaClass("android.content.Intent");
-        AndroidJavaObject intentObject = new AndroidJavaObject("android.content.Intent");
-        intentObject.Call<AndroidJavaObject>(
-            "setAction",
-            intentClass.GetStatic<string>("ACTION_SEND")
-        );
+		Debug.Log( "Permission result: " + permission );
 
-        string authority = Application.identifier + ".fileprovider";
-        AndroidJavaClass fileProviderClass = new AndroidJavaClass(
-            "androidx.core.content.FileProvider"
-        );
-        AndroidJavaObject uri = fileProviderClass.CallStatic<AndroidJavaObject>(
-            "getUriForFile",
-            new object[]
-            {
-                Application.identifier + ".provider",
-                new AndroidJavaObject("java.io.File", streamingPath)
-            }
-        );
-
-        intentObject.Call<AndroidJavaObject>(
-            "putExtra",
-            intentClass.GetStatic<string>("EXTRA_STREAM"),
-            uri
-        );
-        intentObject.Call<AndroidJavaObject>("setType", "text/csv");
-
-        AndroidJavaClass unity = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
-        AndroidJavaObject currentActivity = unity.GetStatic<AndroidJavaObject>("currentActivity");
-        AndroidJavaObject chooser = intentClass.CallStatic<AndroidJavaObject>(
-            "createChooser",
-            intentObject,
-            "Compartilhar registros CSV"
-        );
-        currentActivity.Call("startActivity", chooser);
 #elif UNITY_STANDALONE
         // No build Windows Desktop, abrir a janela do navegador com a URL para o arquivo
-        string streamingUrl = Path.Combine(Application.streamingAssetsPath, "registros.csv");
-        Application.OpenURL(streamingUrl);
+        Application.OpenURL(filePath);
 #elif UNITY_EDITOR
         // No Unity Editor, abrir a janela do navegador com a URL para o arquivo
-        string streamingUrl = Path.Combine(Application.streamingAssetsPath, "registros.csv");
-        Application.OpenURL(streamingUrl);
+        Application.OpenURL(filePath);
 #endif
     }
+
+
 
     public void FillFormDataFromUI()
     {
