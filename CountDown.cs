@@ -6,9 +6,11 @@ using UnityEngine.UI;
 
 public class CountDown : MonoBehaviour
 {
+
     public int countTotal;
+    public GameObject countDown;
     public UnityEvent onStart;
-    public onProgressEvent onProgress;
+    public UnityEvent onProgress;
     public UnityEvent onFinish;
 
     bool isCount;
@@ -23,6 +25,11 @@ public class CountDown : MonoBehaviour
     void ResetCount() {
         isCount = false;
         count = countTotal;
+        if(countDown) {
+            countDown.GetComponent<Text>().text = "";
+        }
+        
+
     }
 
     public void StartCount() {
@@ -42,7 +49,10 @@ public class CountDown : MonoBehaviour
         isCount = true;
         while(isCount) {
             if(count>0) {
-                onProgress.Invoke(count.ToString());
+                if(countDown) {
+                    countDown.GetComponent<Text>().text = count.ToString();
+                }
+                onProgress.Invoke();
                 count--;
                 yield return new WaitForSeconds(1f);
             }
@@ -53,6 +63,3 @@ public class CountDown : MonoBehaviour
         }
     }
 }
-
-[System.Serializable]
-public class onProgressEvent : UnityEvent<string> { }
