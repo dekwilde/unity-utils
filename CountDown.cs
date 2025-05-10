@@ -6,40 +6,50 @@ using UnityEngine.UI;
 
 public class CountDown : MonoBehaviour
 {
-
     public int countTotal;
     public GameObject countDown;
     public UnityEvent onStart;
     public UnityEvent onProgress;
     public UnityEvent onFinish;
 
-    bool isCount;
+    private bool isCount;
+    private int count;
+    private Coroutine countCoroutine;
 
-    int count;
-    
     void Start()
     {
-        ResetCount();  
+        ResetCount();
     }
 
-    void ResetCount() {
+    void ResetCount()
+    {
         isCount = false;
         count = countTotal;
-        if(countDown) {
+
+        if (countDown)
+        {
             countDown.GetComponent<Text>().text = "";
         }
-        
-
     }
 
-    public void StartCount() {
-        if(!isCount) {
-            StartCoroutine(InitCount());
+    public void StartCount()
+    {
+        if (countCoroutine != null)
+        {
+            StopCoroutine(countCoroutine);
         }
-        
+
+        countCoroutine = StartCoroutine(InitCount());
     }
 
-    public void StopCount() {
+    public void StopCount()
+    {
+        if (countCoroutine != null)
+        {
+            StopCoroutine(countCoroutine);
+            countCoroutine = null;
+        }
+
         ResetCount();
     }
 
@@ -47,18 +57,27 @@ public class CountDown : MonoBehaviour
     {
         onStart.Invoke();
         isCount = true;
-        while(isCount) {
-            if(count>0) {
-                if(countDown) {
+
+        while (isCount)
+        {
+            if (count > 0)
+            {
+                if (countDown)
+                {
                     countDown.GetComponent<Text>().text = count.ToString();
                 }
+                
                 onProgress.Invoke();
                 count--;
+
                 yield return new WaitForSeconds(1f);
             }
-            else {
+            else
+            {
                 onFinish.Invoke();
                 ResetCount();
+                countCoroutine = null;
+                yield break;
             }
         }
     }
