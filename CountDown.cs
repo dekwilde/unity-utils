@@ -7,16 +7,15 @@ using UnityEngine.UI;
 public class CountDown : MonoBehaviour
 {
     public int countTotal;
-    public GameObject countDown;
     public UnityEvent onStart;
-    public UnityEvent onProgress;
+    public onProgressEvent onProgress;
     public UnityEvent onFinish;
 
     private bool isCount;
     private int count;
     private Coroutine countCoroutine;
 
-    void Start()
+    void Awake()
     {
         ResetCount();
     }
@@ -25,11 +24,6 @@ public class CountDown : MonoBehaviour
     {
         isCount = false;
         count = countTotal;
-
-        if (countDown)
-        {
-            countDown.GetComponent<Text>().text = "";
-        }
     }
 
     public void StartCount()
@@ -62,14 +56,8 @@ public class CountDown : MonoBehaviour
         {
             if (count > 0)
             {
-                if (countDown)
-                {
-                    countDown.GetComponent<Text>().text = count.ToString();
-                }
-                
-                onProgress.Invoke();
+                onProgress.Invoke(count.ToString());
                 count--;
-
                 yield return new WaitForSeconds(1f);
             }
             else
@@ -82,3 +70,6 @@ public class CountDown : MonoBehaviour
         }
     }
 }
+
+[System.Serializable]
+public class onProgressEvent : UnityEvent<string> { }
