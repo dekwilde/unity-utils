@@ -7,148 +7,187 @@ public class GestureDetector : MonoBehaviour
 {
     private Vector2 fingerDown;
     private Vector2 fingerUp;
-    public bool detectSwipeOnlyAfterRelease = false;
 
+    public bool detectSwipeOnlyAfterRelease = false;
     public float SWIPE_THRESHOLD = 20f;
 
-    public UnityEvent InvokeUp;
-    public UnityEvent InvokeDown;
-    public UnityEvent InvokeLeft;
-    public UnityEvent InvokeRight;
-    public UnityEvent InvokeClickDown;
-    public UnityEvent InvokeClickUp;
+    [Header("Swipe Events")]
+    public UnityEvent InvokeSwipeUp;
+    public UnityEvent InvokeSwipeDown;
+    public UnityEvent InvokeSwipeLeft;
+    public UnityEvent InvokeSwipeRight;
 
-    // Update is called once per frame
+    [Header("Press Events")]
+    public UnityEvent InvokePressDown;
+    public UnityEvent InvokePressUp;
+    public UnityEvent InvokeClick;
+
+    [Header("Move Events")]
+    public UnityEvent InvokeMove;
+    public UnityEvent InvokeDrag;
+
+    private bool isDragging;
+    private bool swipeDetected;
+
     void Update()
     {
         if (Application.isMobilePlatform)
         {
-            // Código para detectar swipes em dispositivos móveis
-            foreach (Touch touch in Input.touches)
+            HandleTouch();
+        }
+        else
+        {
+            HandleMouse();
+        }
+    }
+
+    // ===================== TOUCH =====================
+
+    void HandleTouch()
+    {
+        foreach (Touch touch in Input.touches)
+        {
+            switch (touch.phase)
             {
-                if (touch.phase == TouchPhase.Began)
-                {
+                case TouchPhase.Began:
                     fingerUp = touch.position;
                     fingerDown = touch.position;
-                    InvokeClickDown.Invoke();
-                }
+                    swipeDetected = false;
+                    isDragging = true;
+                    InvokePressDown.Invoke();
+                    break;
 
-                // Detecta o swipe enquanto o dedo ainda está se movendo
-                if (touch.phase == TouchPhase.Moved)
-                {
+                case TouchPhase.Moved:
+                    InvokeMove.Invoke();
+                    InvokeDrag.Invoke();
+
                     if (!detectSwipeOnlyAfterRelease)
                     {
                         fingerDown = touch.position;
-                        checkSwipe();
+                        CheckSwipe();
                     }
-                }
+                    break;
 
-                // Detecta o swipe após o dedo ser solto
-                if (touch.phase == TouchPhase.Ended)
-                {
+                case TouchPhase.Ended:
                     fingerDown = touch.position;
-                    checkSwipe();
-                    InvokeClickUp.Invoke();
-                }
-            }
-        }
-        else
-        {
-            // Código para detectar swipes usando o mouse no desktop
-            if (Input.GetMouseButtonDown(0))
-            {
-                fingerUp = Input.mousePosition;
-                fingerDown = Input.mousePosition;
-                InvokeClickDown.Invoke();
-            }
+                    CheckSwipe();
+                    InvokePressUp.Invoke();
 
-            if (Input.GetMouseButton(0))
-            {
-                if (!detectSwipeOnlyAfterRelease)
-                {
-                    fingerDown = Input.mousePosition;
-                    checkSwipe();
-                }
-            }
+                    if (!swipeDetected)
+                    {
+                        InvokeClick.Invoke();
+                    }
 
-            if (Input.GetMouseButtonUp(0))
-            {
-                fingerDown = Input.mousePosition;
-                checkSwipe();
-                InvokeClickUp.Invoke();
+                    isDragging = false;
+                    break;
             }
         }
     }
 
-    void checkSwipe()
+    // ===================== MOUSE =====================
+
+    void HandleMouse()
     {
-        // Checa o swipe vertical
-        if (verticalMove() > SWIPE_THRESHOLD && verticalMove() > horizontalValMove())
+        if (Input.GetMouseButtonDown(0))
         {
-            if (fingerDown.y - fingerUp.y > 0) // swipe para cima
-            {
-                OnSwipeUp();
-            }
-            else if (fingerDown.y - fingerUp.y < 0) // swipe para baixo
-            {
-                OnSwipeDown();
-            }
-            fingerUp = fingerDown;
+            fingerUp = Input.mousePosition;
+            fingerDown = Input.mousePosition;
+            swipeDetected = false;
+            isDragging = true;
+            InvokePressDown.Invoke();
         }
 
-        // Checa o swipe horizontal
-        else if (horizontalValMove() > SWIPE_THRESHOLD && horizontalValMove() > verticalMove())
+        if (Input.GetMouseButton(0))
         {
-            if (fingerDown.x - fingerUp.x > 0) // swipe para a direita
+            InvokeMove.Invoke();
+            InvokeDrag.Invoke();
+
+            if (!detectSwipeOnlyAfterRelease)
             {
-                OnSwipeRight();
+                fingerDown = Input.mousePosition;
+                CheckSwipe();
             }
-            else if (fingerDown.x - fingerUp.x < 0) // swipe para a esquerda
-            {
-                OnSwipeLeft();
-            }
-            fingerUp = fingerDown;
         }
 
-        // Nenhum movimento detectado
-        else
+        if (Input.GetMouseButtonUp(0))
         {
-            //Debug.Log("No Swipe!");
+            fingerDown = Input.mousePosition;
+            CheckSwipe();
+            InvokePressUp.Invoke();
+
+            if (!swipeDetected)
+            {
+                InvokeClick.Invoke();
+            }
+
+            isDragging = false;
         }
     }
 
-    float verticalMove()
+    // ===================== SWIPE =====================
+
+    void CheckSwipe()
+    {
+        float vertical = VerticalMove();
+        float horizontal = HorizontalMove();
+
+        if (vertical > SWIPE_THRESHOLD && vertical > horizontal)
+        {
+            swipeDetected = true;
+
+            if (fingerDown.y - fingerUp.y > 0)
+                OnSwipeUp();
+            else
+                OnSwipeDown();
+
+            fingerUp = fingerDown;
+        }
+        else if (horizontal > SWIPE_THRESHOLD && horizontal > vertical)
+        {
+            swipeDetected = true;
+
+            if (fingerDown.x - fingerUp.x > 0)
+                OnSwipeRight();
+            else
+                OnSwipeLeft();
+
+            fingerUp = fingerDown;
+        }
+    }
+
+    float VerticalMove()
     {
         return Mathf.Abs(fingerDown.y - fingerUp.y);
     }
 
-    float horizontalValMove()
+    float HorizontalMove()
     {
         return Mathf.Abs(fingerDown.x - fingerUp.x);
     }
 
-    //////////////////////////////////CALLBACK FUNCTIONS/////////////////////////////
+    // ===================== CALLBACKS =====================
+
     void OnSwipeUp()
     {
-        Debug.Log("Swipe UP");
-        InvokeUp.Invoke();
+        Debug.Log("Swipe Up");
+        InvokeSwipeUp.Invoke();
     }
 
     void OnSwipeDown()
     {
         Debug.Log("Swipe Down");
-        InvokeDown.Invoke();
+        InvokeSwipeDown.Invoke();
     }
 
     void OnSwipeLeft()
     {
         Debug.Log("Swipe Left");
-        InvokeLeft.Invoke();
+        InvokeSwipeLeft.Invoke();
     }
 
     void OnSwipeRight()
     {
         Debug.Log("Swipe Right");
-        InvokeRight.Invoke();
+        InvokeSwipeRight.Invoke();
     }
 }

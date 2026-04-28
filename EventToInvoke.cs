@@ -11,6 +11,7 @@ public class EventToInvoke : MonoBehaviour
     public UnityEvent onStart;
     public bool state = true;
     public UnityEvent onIfEvent;
+    public UnityEvent onElseEvent;
 
     
     void OnEnable() {
@@ -32,6 +33,9 @@ public class EventToInvoke : MonoBehaviour
     public void IfEvent() {
         if(state) {
             onIfEvent.Invoke();
+        } else
+        {
+            onElseEvent.Invoke();
         }
         
     }
